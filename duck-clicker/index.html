@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Duck Clicker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="topBar">
+    <div id="moneyDisplay">Coins: 0</div>
+    <div id="prestigeDisplay">Prestige: 0</div>
+    <button id="shopBtn">Shop</button>
+    <button id="adminBtn">Admin</button>
+    <button id="settingsBtn">Settings</button>
+</div>
+
+<div id="duckContainer">
+    <div id="duck"></div>
+</div>
+
+<div id="floatingTextContainer"></div>
+<div id="particleContainer"></div>
+
+<!-- SHOP -->
+<div id="shop" class="panel hidden">
+    <div class="panel-header">
+        <span>Shop</span>
+        <button class="closeBtn" id="closeShop">✕</button>
+    </div>
+    <div class="panel-body">
+        <h3>Click Upgrades</h3>
+        <button id="upgradeClick">+1 Click Power — 50 coins</button>
+        <button id="upgradeClickBig">+5 Click Power — 200 coins</button>
+
+        <h3>Automation</h3>
+        <button id="autoClick">Auto Clicker — 300 coins</button>
+        <button id="autoClickFast">Fast Auto Clicker — 1000 coins</button>
+
+        <h3>Skins & Evolution</h3>
+        <button id="buySkinBlue">Blue Duck — 500 coins</button>
+        <button id="buySkinRed">Red Duck — 1000 coins</button>
+        <button id="evolveDuck">Evolve Duck — 3000 coins</button>
+
+        <h3>Prestige</h3>
+        <button id="prestigeBtn">Prestige (+1, reset) — 5000 coins</button>
+    </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" class="panel hidden draggable">
+    <div class="panel-header" id="adminHeader">
+        <span>Admin Panel</span>
+        <button class="closeBtn" id="closeAdmin">✕</button>
+    </div>
+    <div class="panel-body">
+        <input id="adminCode" placeholder="Enter Code">
+        <button id="submitCode">Unlock</button>
+
+        <div id="adminTools" class="hidden">
+            <h3>Admin Controls</h3>
+            <input id="adminAmount" type="number" placeholder="Amount">
+            <button id="giveCoins">Give Coins</button>
+            <button id="removeCoins">Remove Coins</button>
+            <button id="setClickPower">Set Click Power</button>
+            <button id="setPrestige">Set Prestige</button>
+            <button id="resetGame">Reset Game</button>
+            <button id="openSuperAdmin">Open Super Admin (1064)</button>
+        </div>
+    </div>
+</div>
+
+<!-- SUPER ADMIN PANEL -->
+<div id="superAdminPanel" class="panel hidden draggable">
+    <div class="panel-header" id="superAdminHeader">
+        <span>Super Admin</span>
+        <button class="closeBtn" id="closeSuperAdmin">✕</button>
+    </div>
+    <div class="panel-body">
+        <button id="resetSelf">Reset My Status</button>
+        <button id="resetAll">Reset All Local Data</button>
+    </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settingsPanel" class="panel hidden">
+    <div class="panel-header">
+        <span>Settings</span>
+        <button class="closeBtn" id="closeSettings">✕</button>
+    </div>
+    <div class="panel-body">
+        <button id="toggleSound">Toggle Sound</button>
+        <button id="dailyReward">Claim Daily Reward</button>
+        <button id="resetProgress">Reset Progress</button>
+    </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leaderboardPanel" class="panel hidden">
+    <div class="panel-header">
+        <span>Leaderboard</span>
+        <button class="closeBtn" id="closeLeaderboard">✕</button>
+    </div>
+    <div class="panel-body">
+        <div id="leaderboardList"></div>
+        <button id="saveScore">Save Current Score</button>
+    </div>
+</div>
+
+<script src="save.js"></script>
+<script src="admin.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
