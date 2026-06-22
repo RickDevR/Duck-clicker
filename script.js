@@ -9,12 +9,14 @@ const upgradeClick = document.getElementById("upgradeClick");
 const autoClick = document.getElementById("autoClick");
 const buySkinBlue = document.getElementById("buySkinBlue");
 const buySkinRed = document.getElementById("buySkinRed");
+const evolveDuckBtn = document.getElementById("evolveDuck");
 const prestigeBtn = document.getElementById("prestigeBtn");
 
 const settingsBtn = document.getElementById("settingsBtn");
 const settingsPanel = document.getElementById("settingsPanel");
 const closeSettings = document.getElementById("closeSettings");
 const toggleSoundBtn = document.getElementById("toggleSound");
+const dailyRewardBtn = document.getElementById("dailyReward");
 const resetProgressBtn = document.getElementById("resetProgress");
 
 const leaderboardPanel = document.getElementById("leaderboardPanel");
@@ -23,6 +25,7 @@ const leaderboardList = document.getElementById("leaderboardList");
 const saveScoreBtn = document.getElementById("saveScore");
 
 const floatingTextContainer = document.getElementById("floatingTextContainer");
+const particleContainer = document.getElementById("particleContainer");
 
 let squishSound = new Audio("squish.wav");
 squishSound.onerror = () => {
@@ -33,6 +36,7 @@ function updateUI() {
     moneyDisplay.textContent = "Coins: " + gameData.coins;
     prestigeDisplay.textContent = "Prestige: " + gameData.prestige;
     applySkin();
+    applyEvolution();
 }
 
 function applySkin() {
@@ -48,6 +52,15 @@ function applySkin() {
     }
 }
 
+function applyEvolution() {
+    if (gameData.evolved) {
+        duck.style.transform = "scale(1.1)";
+        duck.style.boxShadow = "0 0 30px rgba(255, 255, 255, 0.7)";
+    } else {
+        duck.style.transform = "scale(1)";
+    }
+}
+
 function spawnFloatingText(text, x, y) {
     const el = document.createElement("div");
     el.className = "floatingText";
@@ -56,6 +69,17 @@ function spawnFloatingText(text, x, y) {
     el.style.top = y + "px";
     floatingTextContainer.appendChild(el);
     setTimeout(() => el.remove(), 800);
+}
+
+function spawnParticles(x, y) {
+    for (let i = 0; i < 6; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        p.style.left = x + "px";
+        p.style.top = y + "px";
+        particleContainer.appendChild(p);
+        setTimeout(() => p.remove(), 600);
+    }
 }
 
 duck.onclick = (e) => {
@@ -68,6 +92,7 @@ duck.onclick = (e) => {
     }
 
     spawnFloatingText("+" + gain, e.clientX, e.clientY);
+    spawnParticles(e.clientX, e.clientY);
     saveGame();
     updateUI();
 };
@@ -111,6 +136,15 @@ buySkinRed.onclick = () => {
     }
 };
 
+evolveDuckBtn.onclick = () => {
+    if (!gameData.evolved && gameData.coins >= 3000) {
+        gameData.coins -= 3000;
+        gameData.evolved = true;
+        saveGame();
+        updateUI();
+    }
+};
+
 prestigeBtn.onclick = () => {
     if (gameData.coins >= 5000) {
         gameData.coins = 0;
@@ -139,6 +173,20 @@ toggleSoundBtn.onclick = () => {
     saveGame();
 };
 
+dailyRewardBtn.onclick = () => {
+    const now = Date.now();
+    const oneDay = 24 * 60 * 60 * 1000;
+    if (now - gameData.lastDailyReward >= oneDay) {
+        gameData.coins += 500;
+        gameData.lastDailyReward = now;
+        saveGame();
+        updateUI();
+        alert("Daily reward claimed: +500 coins!");
+    } else {
+        alert("You already claimed your daily reward.");
+    }
+};
+
 resetProgressBtn.onclick = () => {
     gameData = {
         coins: 0,
@@ -146,16 +194,21 @@ resetProgressBtn.onclick = () => {
         autoClicker: false,
         prestige: 0,
         soundEnabled: true,
-        skin: "yellow"
+        skin: "yellow",
+        evolved: false,
+        lastDailyReward: 0
     };
     saveGame();
     updateUI();
 };
 
-/* Leaderboard (local) */
+/* Leaderboard (local only) */
 function loadLeaderboard() {
     let data = localStorage.getItem("duckLeaderboard");
-    if (!data) return;
+    if (!data) {
+        leaderboardList.innerHTML = "No scores yet.";
+        return;
+    }
     let scores = JSON.parse(data);
     leaderboardList.innerHTML = "";
     scores.forEach((s, i) => {
