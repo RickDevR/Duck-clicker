@@ -19,6 +19,7 @@
 </div>
 
 <div id="floatingTextContainer"></div>
+<div id="particleContainer"></div>
 
 <!-- SHOP -->
 <div id="shop" class="panel hidden">
@@ -31,6 +32,7 @@
         <button id="autoClick">Buy Auto Clicker — 200 coins</button>
         <button id="buySkinBlue">Buy Blue Duck Skin — 500 coins</button>
         <button id="buySkinRed">Buy Red Duck Skin — 1000 coins</button>
+        <button id="evolveDuck">Evolve Duck — 3000 coins</button>
         <button id="prestigeBtn">Prestige (Reset, +1 Prestige) — 5000 coins</button>
     </div>
 </div>
@@ -46,12 +48,25 @@
         <button id="submitCode">Unlock</button>
 
         <div id="adminTools" class="hidden">
-            <button id="giveCoins">Give 10,000 Coins</button>
-            <button id="removeCoins">Remove 10,000 Coins</button>
-            <button id="setClickPower">Set Click Power to 10</button>
+            <input id="adminAmount" type="number" placeholder="Amount">
+            <button id="giveCoins">Give Coins</button>
+            <button id="removeCoins">Remove Coins</button>
+            <button id="setClickPower">Set Click Power</button>
             <button id="resetGame">Reset Game</button>
-            <button id="givePrestige">Give +1 Prestige</button>
+            <button id="openSuperAdmin">Open Super Admin (1064)</button>
         </div>
+    </div>
+</div>
+
+<!-- SUPER ADMIN PANEL -->
+<div id="superAdminPanel" class="panel hidden draggable">
+    <div class="panel-header" id="superAdminHeader">
+        <span>Super Admin</span>
+        <button class="closeBtn" id="closeSuperAdmin">✕</button>
+    </div>
+    <div class="panel-body">
+        <button id="resetSelf">Reset My Status</button>
+        <button id="resetAll">Reset All Local Data</button>
     </div>
 </div>
 
@@ -63,6 +78,7 @@
     </div>
     <div class="panel-body">
         <button id="toggleSound">Toggle Sound</button>
+        <button id="dailyReward">Claim Daily Reward</button>
         <button id="resetProgress">Reset Progress</button>
     </div>
 </div>
