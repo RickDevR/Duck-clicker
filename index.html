@@ -1,114 +1,163 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Duck Clicker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duck Clicker Universe Deluxe</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="topBar">
-    <div id="moneyDisplay">Coins: 0</div>
-    <div id="prestigeDisplay">Prestige: 0</div>
-    <button id="shopBtn">Shop</button>
-    <button id="adminBtn">Admin</button>
-    <button id="settingsBtn">Settings</button>
-</div>
+    <!-- AMBIENT FLOATING FEATHER BACKGROUND EFFECT -->
+    <div id="ambientFeatherContainer"></div>
 
-<div id="duckContainer">
-    <div id="duck"></div>
-</div>
-
-<div id="floatingTextContainer"></div>
-<div id="particleContainer"></div>
-
-<!-- SHOP -->
-<div id="shop" class="panel hidden">
-    <div class="panel-header">
-        <span>Shop</span>
-        <button class="closeBtn" id="closeShop">✕</button>
+    <!-- TOP BAR -->
+    <div id="topBar">
+        <div class="stat-badge pulse-badge" id="moneyDisplay">🪙 Coins: 0</div>
+        <div class="stat-badge" id="cpsDisplay">⚡ CPS: 0</div>
+        <div class="stat-badge" id="clickPowerDisplay">💪 Power: +1</div>
+        <div class="stat-badge" id="prestigeDisplay">✨ Prestige: 0</div>
+        <button class="nav-btn" id="shopBtn">🛒 Shop & Lab</button>
+        <button class="nav-btn" id="statsBtn">📊 Stats</button>
+        <button class="nav-btn" id="achievementsBtn">🏆 Quests</button>
+        <button class="nav-btn" id="adminBtn">🔒 Admin Portal</button>
+        <button class="nav-btn" id="settingsBtn">⚙️ Settings</button>
     </div>
-    <div class="panel-body">
-        <h3>Click Upgrades</h3>
-        <button id="upgradeClick">+1 Click Power — 50 coins</button>
-        <button id="upgradeClickBig">+5 Click Power — 200 coins</button>
 
-        <h3>Automation</h3>
-        <button id="autoClick">Auto Clicker — 300 coins</button>
-        <button id="autoClickFast">Fast Auto Clicker — 1000 coins</button>
-
-        <h3>Skins & Evolution</h3>
-        <button id="buySkinBlue">Blue Duck — 500 coins</button>
-        <button id="buySkinRed">Red Duck — 1000 coins</button>
-        <button id="evolveDuck">Evolve Duck — 3000 coins</button>
-
-        <h3>Prestige</h3>
-        <button id="prestigeBtn">Prestige (+1, reset) — 5000 coins</button>
+    <!-- MAIN GAME AREA -->
+    <div id="gameWrapper">
+        <div id="comboDisplay">🔥 Combo: x1</div>
+        <div id="duckContainer">
+            <div id="duck">
+                <div class="duck-crown">👑</div>
+                <div class="duck-eye"></div>
+                <div class="duck-blush"></div>
+                <div class="duck-wing"></div>
+            </div>
+        </div>
+        <div id="duckStatusBubble">Quack! Click me!</div>
     </div>
-</div>
 
-<!-- ADMIN PANEL -->
-<div id="adminPanel" class="panel hidden draggable">
-    <div class="panel-header" id="adminHeader">
-        <span>Admin Panel</span>
-        <button class="closeBtn" id="closeAdmin">✕</button>
-    </div>
-    <div class="panel-body">
-        <input id="adminCode" placeholder="Enter Code">
-        <button id="submitCode">Unlock</button>
+    <div id="floatingTextContainer"></div>
+    <div id="particleContainer"></div>
 
-        <div id="adminTools" class="hidden">
-            <h3>Admin Controls</h3>
-            <input id="adminAmount" type="number" placeholder="Amount">
-            <button id="giveCoins">Give Coins</button>
-            <button id="removeCoins">Remove Coins</button>
-            <button id="setClickPower">Set Click Power</button>
-            <button id="setPrestige">Set Prestige</button>
-            <button id="resetGame">Reset Game</button>
-            <button id="openSuperAdmin">Open Super Admin (1064)</button>
+    <!-- SHOP & LAB -->
+    <div id="shop" class="panel hidden">
+        <div class="panel-header">
+            <span>🛒 Duck Universe Shop & Lab</span>
+            <button class="closeBtn" id="closeShop">✕</button>
+        </div>
+        <div class="panel-body custom-scroll">
+            <h3>💪 Click Enhancements</h3>
+            <button id="upgradeClick" class="shop-item-btn">+1 Click Power <span class="cost">50 🪙</span></button>
+            <button id="upgradeClickBig" class="shop-item-btn">+5 Click Power <span class="cost">200 🪙</span></button>
+            <button id="upgradeClickMega" class="shop-item-btn">+25 Click Power <span class="cost">950 🪙</span></button>
+            <button id="upgradeClickGod" class="shop-item-btn">+100 Click Power <span class="cost">4500 🪙</span></button>
+
+            <h3>🤖 Automation Minions</h3>
+            <button id="autoClick" class="shop-item-btn">Auto Duck (1/s) <span class="cost">300 🪙</span></button>
+            <button id="autoClickFast" class="shop-item-btn">Turbo Duck (3/s) <span class="cost">1200 🪙</span></button>
+            <button id="autoClickHyper" class="shop-item-btn">Quantum Duck (12/s) <span class="cost">5500 🪙</span></button>
+            <button id="buyDuckArmy" class="shop-item-btn">🦆 Duck Army Outpost (+50 CPS) <span class="cost">22000 🪙</span></button>
+
+            <h3>✨ Exotic Skins & Evolutions</h3>
+            <button id="buySkinBlue" class="shop-item-btn">Sapphire Nebula Duck <span class="cost">500 🪙</span></button>
+            <button id="buySkinRed" class="shop-item-btn">Crimson Phoenix Duck <span class="cost">1200 🪙</span></button>
+            <button id="buySkinGold" class="shop-item-btn">Midas Sovereign Duck <span class="cost">3000 🪙</span></button>
+            <button id="buySkinRainbow" class="shop-item-btn">🌈 Cyber Rainbow RGB Duck <span class="cost">10000 🪙</span></button>
+            <button id="evolveDuck" class="shop-item-btn">🌟 Ascend & Evolve Duck Aura <span class="cost">4500 🪙</span></button>
+
+            <h3>🌌 Universal Prestige</h3>
+            <button id="prestigeBtn" class="shop-item-btn prestige-action">✨ Cosmic Prestige (+Multi) <span class="cost">7500 🪙</span></button>
         </div>
     </div>
-</div>
 
-<!-- SUPER ADMIN PANEL -->
-<div id="superAdminPanel" class="panel hidden draggable">
-    <div class="panel-header" id="superAdminHeader">
-        <span>Super Admin</span>
-        <button class="closeBtn" id="closeSuperAdmin">✕</button>
+    <!-- STATS PANEL -->
+    <div id="statsPanel" class="panel hidden">
+        <div class="panel-header">
+            <span>📊 Detailed Player Stats</span>
+            <button class="closeBtn" id="closeStats">✕</button>
+        </div>
+        <div class="panel-body custom-scroll" id="statsContentList"></div>
     </div>
-    <div class="panel-body">
-        <button id="resetSelf">Reset My Status</button>
-        <button id="resetAll">Reset All Local Data</button>
-    </div>
-</div>
 
-<!-- SETTINGS -->
-<div id="settingsPanel" class="panel hidden">
-    <div class="panel-header">
-        <span>Settings</span>
-        <button class="closeBtn" id="closeSettings">✕</button>
+    <!-- ACHIEVEMENTS PANEL -->
+    <div id="achievementsPanel" class="panel hidden">
+        <div class="panel-header">
+            <span>🏆 Trophies & Quests</span>
+            <button class="closeBtn" id="closeAchievements">✕</button>
+        </div>
+        <div class="panel-body custom-scroll" id="achievementListContainer"></div>
     </div>
-    <div class="panel-body">
-        <button id="toggleSound">Toggle Sound</button>
-        <button id="dailyReward">Claim Daily Reward</button>
-        <button id="resetProgress">Reset Progress</button>
-    </div>
-</div>
 
-<!-- LEADERBOARD -->
-<div id="leaderboardPanel" class="panel hidden">
-    <div class="panel-header">
-        <span>Leaderboard</span>
-        <button class="closeBtn" id="closeLeaderboard">✕</button>
+    <!-- ADMIN PANEL -->
+    <div id="adminPanel" class="panel hidden draggable">
+        <div class="panel-header" id="adminHeader">
+            <span>🔒 Secure Overlord Portal</span>
+            <button class="closeBtn" id="closeAdmin">✕</button>
+        </div>
+        <div class="panel-body">
+            <div id="adminAuthSection">
+                <input id="adminCode" type="password" placeholder="Enter Security Passcode">
+                <button id="submitCode" class="action-btn full-width">Unlock Command Center</button>
+            </div>
+            <div id="adminTools" class="hidden">
+                <h3>⚡ Universe Control Hub</h3>
+                <input id="adminAmount" type="number" placeholder="Enter Value">
+                <div class="admin-grid">
+                    <button id="giveCoins" class="action-btn">Give Coins</button>
+                    <button id="removeCoins" class="action-btn">Take Coins</button>
+                    <button id="setClickPower" class="action-btn">Set Click Power</button>
+                    <button id="setPrestige" class="action-btn">Set Prestige</button>
+                    <button id="resetGame" class="danger-btn">Reset Stats</button>
+                    <button id="openSuperAdmin" class="super-btn">Super Console</button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="panel-body">
-        <div id="leaderboardList"></div>
-        <button id="saveScore">Save Current Score</button>
+
+    <!-- SUPER ADMIN PANEL -->
+    <div id="superAdminPanel" class="panel hidden draggable">
+        <div class="panel-header" id="superAdminHeader">
+            <span>👑 Super Admin God Console</span>
+            <button class="closeBtn" id="closeSuperAdmin">✕</button>
+        </div>
+        <div class="panel-body">
+            <p class="warning-text">⚠️ Omnipotent System Operations</p>
+            <button id="maxEverything" class="super-btn full-width">⚡ Max Out All Game Stats</button>
+            <button id="resetSelf" class="action-btn full-width">🔄 Reset Player State</button>
+            <button id="resetAll" class="danger-btn full-width">🗑️ Wipe Entire Local Universe</button>
+        </div>
     </div>
-</div>
 
-<script src="save.js"></script>
-<script src="admin.js"></script>
-<script src="script.js"></script>
+    <!-- SETTINGS -->
+    <div id="settingsPanel" class="panel hidden">
+        <div class="panel-header">
+            <span>⚙️ Settings & Audio Lab</span>
+            <button class="closeBtn" id="closeSettings">✕</button>
+        </div>
+        <div class="panel-body">
+            <button id="toggleSound" class="action-btn full-width">🔊 Toggle Sound Effects</button>
+            <button id="toggleParticles" class="action-btn full-width">✨ Toggle Particle Physics</button>
+            <button id="dailyReward" class="action-btn full-width">🎁 Claim Daily Tribute (+2500 🪙)</button>
+            <button id="resetProgress" class="danger-btn full-width">🗑️ Hard Factory Reset</button>
+        </div>
+    </div>
 
+    <!-- LEADERBOARD -->
+    <div id="leaderboardPanel" class="panel hidden">
+        <div class="panel-header">
+            <span>🏆 Hall of Fame Leaderboard</span>
+            <button class="closeBtn" id="closeLeaderboard">✕</button>
+        </div>
+        <div class="panel-body custom-scroll">
+            <div id="leaderboardList"></div>
+            <button id="saveScore" class="action-btn full-width">💾 Save Current Score</button>
+        </div>
+    </div>
+
+    <script src="save.js"></script>
+    <script src="admin.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

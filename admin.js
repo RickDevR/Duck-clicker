@@ -2,6 +2,7 @@ const adminBtn = document.getElementById("adminBtn");
 const adminPanel = document.getElementById("adminPanel");
 const closeAdmin = document.getElementById("closeAdmin");
 const submitCode = document.getElementById("submitCode");
+const adminAuthSection = document.getElementById("adminAuthSection");
 const adminTools = document.getElementById("adminTools");
 const adminCode = document.getElementById("adminCode");
 const adminAmount = document.getElementById("adminAmount");
@@ -9,6 +10,7 @@ const adminAmount = document.getElementById("adminAmount");
 const giveCoins = document.getElementById("giveCoins");
 const removeCoins = document.getElementById("removeCoins");
 const setClickPower = document.getElementById("setClickPower");
+const setPrestige = document.getElementById("setPrestige");
 const resetGame = document.getElementById("resetGame");
 const openSuperAdmin = document.getElementById("openSuperAdmin");
 
@@ -16,17 +18,40 @@ const superAdminPanel = document.getElementById("superAdminPanel");
 const closeSuperAdmin = document.getElementById("closeSuperAdmin");
 const resetSelfBtn = document.getElementById("resetSelf");
 const resetAllBtn = document.getElementById("resetAll");
+const maxEverything = document.getElementById("maxEverything");
 
-adminBtn.onclick = () => adminPanel.classList.remove("hidden");
-closeAdmin.onclick = () => adminPanel.classList.add("hidden");
+adminBtn.onclick = () => {
+    playSound("click");
+    adminPanel.classList.remove("hidden");
+};
+closeAdmin.onclick = () => {
+    playSound("click");
+    adminPanel.classList.add("hidden");
+};
+
+// Secure obfuscated validation (hidden from plain view, works locally and online)
+function verifyAdminCode(input) {
+    // Encoded token representing "2285"
+    const encodedToken = "MjI4NQ==";
+    try {
+        return atob(encodedToken) === input.trim();
+    } catch (e) {
+        return false;
+    }
+}
 
 submitCode.onclick = () => {
-    if (adminCode.value === "6355") {
+    playSound("click");
+    if (verifyAdminCode(adminCode.value)) {
+        playSound("success");
+        adminAuthSection.classList.add("hidden");
         adminTools.classList.remove("hidden");
-        adminCode.value = "";
-    } else if (adminCode.value === "1064") {
         superAdminPanel.classList.remove("hidden");
         adminCode.value = "";
+    } else {
+        playSound("error");
+        adminCode.style.borderColor = "#ff1744";
+        setTimeout(() => adminCode.style.borderColor = "", 1000);
     }
 };
 
@@ -36,15 +61,18 @@ function getAdminAmount() {
 }
 
 giveCoins.onclick = () => {
+    playSound("upgrade");
     const amt = getAdminAmount();
     if (amt > 0) {
         gameData.coins += amt;
+        gameData.totalCoinsEarned += amt;
         saveGame();
         updateUI();
     }
 };
 
 removeCoins.onclick = () => {
+    playSound("click");
     const amt = getAdminAmount();
     if (amt > 0) {
         gameData.coins = Math.max(0, gameData.coins - amt);
@@ -54,6 +82,7 @@ removeCoins.onclick = () => {
 };
 
 setClickPower.onclick = () => {
+    playSound("upgrade");
     const amt = getAdminAmount();
     if (amt > 0) {
         gameData.clickPower = amt;
@@ -62,63 +91,76 @@ setClickPower.onclick = () => {
     }
 };
 
+setPrestige.onclick = () => {
+    playSound("upgrade");
+    const amt = getAdminAmount();
+    if (amt >= 0) {
+        gameData.prestige = amt;
+        saveGame();
+        updateUI();
+    }
+};
+
 resetGame.onclick = () => {
-    gameData = {
-        coins: 0,
-        clickPower: 1,
-        autoClicker: false,
-        prestige: 0,
-        soundEnabled: true,
-        skin: "yellow",
-        evolved: false,
-        lastDailyReward: 0
-    };
-    saveGame();
-    updateUI();
+    playSound("error");
+    if (confirm("Reset current game stats?")) {
+        gameData.coins = 0;
+        gameData.clickPower = 1;
+        gameData.autoClicker = false;
+        gameData.duckArmyCount = 0;
+        gameData.prestige = 0;
+        gameData.skin = "yellow";
+        gameData.evolved = false;
+        saveGame();
+        updateUI();
+    }
 };
 
 openSuperAdmin.onclick = () => {
+    playSound("click");
     superAdminPanel.classList.remove("hidden");
 };
 
 closeSuperAdmin.onclick = () => {
+    playSound("click");
     superAdminPanel.classList.add("hidden");
 };
 
 resetSelfBtn.onclick = () => {
-    gameData = {
-        coins: 0,
-        clickPower: 1,
-        autoClicker: false,
-        prestige: 0,
-        soundEnabled: true,
-        skin: "yellow",
-        evolved: false,
-        lastDailyReward: 0
-    };
+    playSound("error");
+    gameData.coins = 0;
+    gameData.clickPower = 1;
+    gameData.autoClicker = false;
+    gameData.duckArmyCount = 0;
+    gameData.prestige = 0;
+    gameData.skin = "yellow";
+    gameData.evolved = false;
     saveGame();
     updateUI();
 };
 
 resetAllBtn.onclick = () => {
-    // This only affects this browser/device
-    localStorage.removeItem("duckSave");
-    localStorage.removeItem("duckLeaderboard");
-    gameData = {
-        coins: 0,
-        clickPower: 1,
-        autoClicker: false,
-        prestige: 0,
-        soundEnabled: true,
-        skin: "yellow",
-        evolved: false,
-        lastDailyReward: 0
-    };
+    playSound("error");
+    if (confirm("Wipe ALL local universe data & leaderboards?")) {
+        localStorage.removeItem("duckSaveUniverse");
+        localStorage.removeItem("duckLeaderboardUniverse");
+        location.reload();
+    }
+};
+
+maxEverything.onclick = () => {
+    playSound("success");
+    gameData.coins += 10000000;
+    gameData.clickPower += 1000;
+    gameData.prestige += 25;
+    gameData.duckArmyCount += 500;
+    gameData.evolved = true;
+    gameData.skin = "rainbow";
     saveGame();
     updateUI();
 };
 
-/* Draggable panels */
+/* Draggable panels implementation */
 function makeDraggable(panel, header) {
     let isDragging = false;
     let offsetX = 0;
@@ -129,13 +171,13 @@ function makeDraggable(panel, header) {
         const rect = panel.getBoundingClientRect();
         offsetX = e.clientX - rect.left;
         offsetY = e.clientY - rect.top;
+        panel.style.transform = "none";
     });
 
     document.addEventListener("mousemove", (e) => {
         if (!isDragging) return;
         panel.style.left = e.clientX - offsetX + "px";
         panel.style.top = e.clientY - offsetY + "px";
-        panel.style.transform = "translate(0, 0)";
     });
 
     document.addEventListener("mouseup", () => {
@@ -143,8 +185,5 @@ function makeDraggable(panel, header) {
     });
 }
 
-const adminHeader = document.getElementById("adminHeader");
-const superAdminHeader = document.getElementById("superAdminHeader");
-
-makeDraggable(adminPanel, adminHeader);
-makeDraggable(superAdminPanel, superAdminHeader);
+makeDraggable(adminPanel, document.getElementById("adminHeader"));
+makeDraggable(superAdminPanel, document.getElementById("superAdminHeader"));
