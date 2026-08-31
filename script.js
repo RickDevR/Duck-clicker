@@ -1,10 +1,33 @@
+// FIREBASE REALTIME DATABASE INITIALIZATION
+const firebaseConfig = {
+    apiKey: "AIzaSyDS9A2CqtnY3-2vv9KmNDPUl5sXifxrmYM",
+    authDomain: "sleek-chat-app-47b2a.firebaseapp.com",
+    projectId: "sleek-chat-app-47b2a",
+    storageBucket: "sleek-chat-app-47b2a.firebasestorage.app",
+    messagingSenderId: "830967591682",
+    appId: "1:830967591682:web:5d7038480abeadbd64081b",
+    databaseURL: "https://sleek-chat-app-47b2a-default-rtdb.firebaseio.com"
+};
+
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
+
+// DOM Elements
 const duck = document.getElementById("duck");
 const moneyDisplay = document.getElementById("moneyDisplay");
 const cpsDisplay = document.getElementById("cpsDisplay");
 const clickPowerDisplay = document.getElementById("clickPowerDisplay");
 const prestigeDisplay = document.getElementById("prestigeDisplay");
 const comboDisplay = document.getElementById("comboDisplay");
-const duckStatusBubble = document.getElementById("duckStatusBubble");
+
+const usernameModal = document.getElementById("usernameModal");
+const usernameInput = document.getElementById("usernameInput");
+const saveUsernameBtn = document.getElementById("saveUsernameBtn");
+const currentUsernameText = document.getElementById("currentUsernameText");
+const ownerTagHeader = document.getElementById("ownerTagHeader");
+const changeUsernameBtn = document.getElementById("changeUsernameBtn");
 
 const shopBtn = document.getElementById("shopBtn");
 const shop = document.getElementById("shop");
@@ -42,22 +65,43 @@ const toggleParticlesBtn = document.getElementById("toggleParticles");
 const dailyRewardBtn = document.getElementById("dailyReward");
 const resetProgressBtn = document.getElementById("resetProgress");
 
+const leaderboardBtn = document.getElementById("leaderboardBtn");
 const leaderboardPanel = document.getElementById("leaderboardPanel");
 const closeLeaderboard = document.getElementById("closeLeaderboard");
 const leaderboardList = document.getElementById("leaderboardList");
-const saveScoreBtn = document.getElementById("saveScore");
+const tabMoney = document.getElementById("tabMoney");
+const tabXP = document.getElementById("tabXP");
+
+const transferBtn = document.getElementById("transferBtn");
+const transferPanel = document.getElementById("transferPanel");
+const closeTransfer = document.getElementById("closeTransfer");
+const transferUserList = document.getElementById("transferUserList");
+const transferForm = document.getElementById("transferForm");
+const selectedRecipientName = document.getElementById("selectedRecipientName");
+const transferAmount = document.getElementById("transferAmount");
+const sendCoinsBtn = document.getElementById("sendCoinsBtn");
+const sendPrestigeBtn = document.getElementById("sendPrestigeBtn");
+
+const chatBtn = document.getElementById("chatBtn");
+const chatPanel = document.getElementById("chatPanel");
+const closeChat = document.getElementById("closeChat");
+const chatBox = document.getElementById("chatBox");
+const chatMessageInput = document.getElementById("chatMessageInput");
+const sendMessageBtn = document.getElementById("sendMessageBtn");
+const adminNavBtn = document.getElementById("adminBtn");
 
 const floatingTextContainer = document.getElementById("floatingTextContainer");
 const particleContainer = document.getElementById("particleContainer");
 const ambientFeatherContainer = document.getElementById("ambientFeatherContainer");
 
-/* --- 10,000x ADVANCED AUDIO SYNTHESIZER ENGINE --- */
-let audioCtx = null;
+let currentSelectedRecipientId = null;
+let activeLeaderboardTab = "money";
+window.allGlobalUsers = {};
 
+/* --- AUDIO SYNTHESIZER --- */
+let audioCtx = null;
 function getAudioContext() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     return audioCtx;
 }
 
@@ -66,7 +110,6 @@ function playSound(type) {
     try {
         const ctx = getAudioContext();
         if (ctx.state === 'suspended') ctx.resume();
-
         const now = ctx.currentTime;
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -79,50 +122,35 @@ function playSound(type) {
             osc.frequency.exponentialRampToValueAtTime(580, now + 0.14);
             gain.gain.setValueAtTime(0.45, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
-            osc.start(now);
-            osc.stop(now + 0.18);
+            osc.start(now); osc.stop(now + 0.18);
         } else if (type === "click") {
             osc.type = "triangle";
             osc.frequency.setValueAtTime(700, now);
             osc.frequency.exponentialRampToValueAtTime(350, now + 0.06);
             gain.gain.setValueAtTime(0.18, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
-            osc.start(now);
-            osc.stop(now + 0.06);
-        } else if (type === "upgrade") {
+            osc.start(now); osc.stop(now + 0.06);
+        } else if (type === "upgrade" || type === "success") {
             osc.type = "sine";
             osc.frequency.setValueAtTime(440, now);
-            osc.frequency.setValueAtTime(659.25, now + 0.08);
-            osc.frequency.setValueAtTime(880, now + 0.16);
+            osc.frequency.setValueAtTime(880, now + 0.15);
             gain.gain.setValueAtTime(0.3, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-            osc.start(now);
-            osc.stop(now + 0.35);
-        } else if (type === "success") {
-            osc.type = "triangle";
-            osc.frequency.setValueAtTime(523.25, now);
-            osc.frequency.setValueAtTime(659.25, now + 0.1);
-            osc.frequency.setValueAtTime(783.99, now + 0.2);
-            osc.frequency.setValueAtTime(1046.50, now + 0.3);
-            gain.gain.setValueAtTime(0.35, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-            osc.start(now);
-            osc.stop(now + 0.5);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
         } else if (type === "error") {
             osc.type = "sawtooth";
             osc.frequency.setValueAtTime(130, now);
             osc.frequency.setValueAtTime(90, now + 0.15);
             gain.gain.setValueAtTime(0.3, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-            osc.start(now);
-            osc.stop(now + 0.25);
+            osc.start(now); osc.stop(now + 0.25);
         }
     } catch (e) {}
 }
 
-/* --- AMBIENT BACKGROUND FEATHERS GENERATOR --- */
+/* --- AMBIENT FEATHERS --- */
 setInterval(() => {
-    if (!gameData.particlesEnabled) return;
+    if (!gameData.particlesEnabled || !ambientFeatherContainer) return;
     const feather = document.createElement("div");
     feather.className = "ambient-feather";
     feather.style.left = Math.random() * window.innerWidth + "px";
@@ -131,7 +159,71 @@ setInterval(() => {
     setTimeout(() => feather.remove(), 15000);
 }, 2500);
 
-/* --- UI & GAME UPDATES --- */
+/* --- FIREBASE SYNC & USER MANAGEMENT --- */
+window.syncToDatabase = function() {
+    if (!gameData.userId) return;
+    db.ref("users/" + gameData.userId).update({
+        username: gameData.username || "DuckPlayer",
+        coins: Math.floor(gameData.coins),
+        prestige: gameData.prestige,
+        clickPower: gameData.clickPower,
+        totalCoinsEarned: Math.floor(gameData.totalCoinsEarned),
+        lastSeen: Date.now()
+    });
+};
+
+function checkUsernameState() {
+    if (!gameData.username || gameData.username.trim() === "") {
+        usernameModal.classList.remove("hidden");
+    } else {
+        usernameModal.classList.add("hidden");
+        currentUsernameText.textContent = gameData.username;
+        window.syncToDatabase();
+    }
+}
+
+saveUsernameBtn.onclick = () => {
+    const name = usernameInput.value.trim();
+    if (name.length >= 2) {
+        gameData.username = name;
+        saveGame();
+        checkUsernameState();
+        playSound("success");
+    } else {
+        playSound("error");
+        alert("Please enter at least 2 characters!");
+    }
+};
+
+changeUsernameBtn.onclick = () => {
+    playSound("click");
+    usernameInput.value = gameData.username || "";
+    usernameModal.classList.remove("hidden");
+    settingsPanel.classList.add("hidden");
+};
+
+db.ref("users/" + gameData.userId).on("value", snapshot => {
+    const val = snapshot.val();
+    if (val) {
+        if (val.isOwner !== undefined) {
+            gameData.isOwner = val.isOwner;
+        }
+        if (val.username && val.username !== gameData.username) {
+            gameData.username = val.username;
+        }
+        saveGame();
+        updateUI();
+    }
+});
+
+db.ref("users").on("value", snapshot => {
+    window.allGlobalUsers = snapshot.val() || {};
+    renderLeaderboard();
+    renderTransferUsers();
+    if (window.renderAdminUserList) window.renderAdminUserList();
+});
+
+/* --- UI UPDATES --- */
 let clickCombo = 1;
 let comboTimer = null;
 
@@ -139,7 +231,8 @@ function updateUI() {
     moneyDisplay.textContent = "🪙 Coins: " + Math.floor(gameData.coins);
     prestigeDisplay.textContent = "✨ Prestige: " + gameData.prestige;
     clickPowerDisplay.textContent = `💪 Power: +${gameData.clickPower * (1 + gameData.prestige)}`;
-    
+    currentUsernameText.textContent = gameData.username || "DuckPlayer";
+
     let baseCPS = 0;
     if (gameData.autoClicker) {
         if (gameData.autoClickSpeed === 1000) baseCPS = 1;
@@ -148,6 +241,14 @@ function updateUI() {
     }
     baseCPS += gameData.duckArmyCount * 50;
     cpsDisplay.textContent = `⚡ CPS: ${baseCPS * (1 + gameData.prestige)}`;
+
+    if (gameData.isOwner) {
+        ownerTagHeader.classList.remove("hidden");
+        if (adminNavBtn) adminNavBtn.classList.remove("hidden");
+    } else {
+        ownerTagHeader.classList.add("hidden");
+        if (adminNavBtn) adminNavBtn.classList.add("hidden");
+    }
 
     applySkin();
     applyEvolution();
@@ -213,7 +314,7 @@ function spawnParticles(x, y) {
     }
 }
 
-/* --- CLICK EVENT WITH COMBO SYSTEM --- */
+/* --- CLICK EVENT & COMBO --- */
 duck.onclick = (e) => {
     let gain = gameData.clickPower * (1 + gameData.prestige) * clickCombo;
     gameData.coins += gain;
@@ -241,7 +342,141 @@ duck.onclick = (e) => {
     updateUI();
 };
 
-/* --- SHOP & UPGRADE ACTIONS --- */
+/* --- LEADERBOARD (TOP 50 PLAYERS) --- */
+leaderboardBtn.onclick = () => { playSound("click"); leaderboardPanel.classList.remove("hidden"); renderLeaderboard(); };
+closeLeaderboard.onclick = () => { playSound("click"); leaderboardPanel.classList.add("hidden"); };
+
+tabMoney.onclick = () => {
+    tabMoney.classList.add("active");
+    tabXP.classList.remove("active");
+    activeLeaderboardTab = "money";
+    renderLeaderboard();
+};
+tabXP.onclick = () => {
+    tabXP.classList.add("active");
+    tabMoney.classList.remove("active");
+    activeLeaderboardTab = "xp";
+    renderLeaderboard();
+};
+
+function renderLeaderboard() {
+    leaderboardList.innerHTML = "";
+    const usersArray = Object.keys(window.allGlobalUsers).map(id => ({ id, ...window.allGlobalUsers[id] }));
+    
+    if (activeLeaderboardTab === "money") {
+        usersArray.sort((a, b) => (b.coins || 0) - (a.coins || 0));
+    } else {
+        usersArray.sort((a, b) => (b.prestige || 0) - (a.prestige || 0));
+    }
+
+    // TOP 50 USERS DISPLAY
+    usersArray.slice(0, 50).forEach((user, index) => {
+        const card = document.createElement("div");
+        const isSelf = user.id === gameData.userId;
+        card.className = `achievement-card ${isSelf ? "unlocked" : ""}`;
+        const valText = activeLeaderboardTab === "money" ? `🪙 ${Math.floor(user.coins || 0)}` : `✨ Prestige: ${user.prestige || 0}`;
+        const ownerTagHtml = user.isOwner ? `<span class="owner-tag">OWNER</span>` : "";
+        card.innerHTML = `
+            <div>
+                <strong>#${index + 1} ${user.username || 'Player'} ${isSelf ? '(You)' : ''}</strong> ${ownerTagHtml}
+            </div>
+            <strong>${valText}</strong>
+        `;
+        leaderboardList.appendChild(card);
+    });
+}
+
+/* --- TRANSFERS --- */
+transferBtn.onclick = () => { playSound("click"); transferPanel.classList.remove("hidden"); renderTransferUsers(); };
+closeTransfer.onclick = () => { playSound("click"); transferPanel.classList.add("hidden"); };
+
+function renderTransferUsers() {
+    transferUserList.innerHTML = "";
+    Object.keys(window.allGlobalUsers).forEach(id => {
+        if (id !== gameData.userId) {
+            const user = window.allGlobalUsers[id];
+            const btn = document.createElement("button");
+            btn.className = "shop-item-btn";
+            btn.innerHTML = `<span>${user.username || 'Player'}</span> <span class="cost">Coins: ${user.coins || 0}</span>`;
+            btn.onclick = () => {
+                currentSelectedRecipientId = id;
+                selectedRecipientName.textContent = `Transferring To: ${user.username || 'Player'}`;
+                transferForm.classList.remove("hidden");
+                playSound("click");
+            };
+            transferUserList.appendChild(btn);
+        }
+    });
+}
+
+sendCoinsBtn.onclick = () => {
+    const amt = parseInt(transferAmount.value, 10);
+    if (!currentSelectedRecipientId || isNaN(amt) || amt <= 0) return alert("Invalid amount or recipient.");
+    if (gameData.coins < amt) return alert("You don't have enough coins!");
+
+    gameData.coins -= amt;
+    db.ref("users/" + currentSelectedRecipientId + "/coins").transaction(current => (current || 0) + amt);
+    saveGame();
+    updateUI();
+    playSound("success");
+    alert("Coins transferred successfully!");
+};
+
+sendPrestigeBtn.onclick = () => {
+    const amt = parseInt(transferAmount.value, 10);
+    if (!currentSelectedRecipientId || isNaN(amt) || amt <= 0) return alert("Invalid amount or recipient.");
+    if (gameData.prestige < amt) return alert("You don't have enough prestige!");
+
+    gameData.prestige -= amt;
+    db.ref("users/" + currentSelectedRecipientId + "/prestige").transaction(current => (current || 0) + amt);
+    saveGame();
+    updateUI();
+    playSound("success");
+    alert("Prestige transferred successfully!");
+};
+
+/* --- GLOBAL CHAT WITH MESSAGE DELETION --- */
+chatBtn.onclick = () => { playSound("click"); chatPanel.classList.remove("hidden"); };
+closeChat.onclick = () => { playSound("click"); chatPanel.classList.add("hidden"); };
+
+sendMessageBtn.onclick = () => {
+    const text = chatMessageInput.value.trim();
+    if (!text) return;
+    db.ref("chat").push({
+        sender: gameData.username || "DuckPlayer",
+        senderId: gameData.userId,
+        isOwner: !!gameData.isOwner,
+        text: text,
+        timestamp: Date.now()
+    });
+    chatMessageInput.value = "";
+    playSound("click");
+};
+
+db.ref("chat").limitToLast(50).on("value", snapshot => {
+    chatBox.innerHTML = "";
+    const msgs = snapshot.val() || {};
+    Object.keys(msgs).forEach(msgKey => {
+        const msg = msgs[msgKey];
+        const msgEl = document.createElement("div");
+        msgEl.className = "chat-msg";
+        const tag = msg.isOwner ? `<span class="owner-tag">OWNER</span>` : "";
+        const canDelete = msg.senderId === gameData.userId || gameData.isOwner;
+        const deleteBtnHtml = canDelete ? `<button onclick="deleteChatMessage('${msgKey}')" style="padding:2px 6px; font-size:10px; margin-left:8px; background:#ff1744;">🗑️</button>` : "";
+        
+        msgEl.innerHTML = `<div><strong>${msg.sender}</strong> ${tag}: <span>${msg.text}</span> ${deleteBtnHtml}</div>`;
+        chatBox.appendChild(msgEl);
+    });
+    chatBox.scrollTop = chatBox.scrollHeight;
+});
+
+window.deleteChatMessage = function(msgKey) {
+    if (confirm("Delete this message?")) {
+        db.ref("chat/" + msgKey).remove();
+    }
+};
+
+/* --- OTHER PANELS --- */
 shopBtn.onclick = () => { playSound("click"); shop.classList.remove("hidden"); };
 closeShop.onclick = () => { playSound("click"); shop.classList.add("hidden"); };
 
@@ -254,150 +489,95 @@ closeAchievements.onclick = () => { playSound("click"); achievementsPanel.classL
 settingsBtn.onclick = () => { playSound("click"); settingsPanel.classList.remove("hidden"); };
 closeSettings.onclick = () => { playSound("click"); settingsPanel.classList.add("hidden"); };
 
+/* --- SHOP UPGRADES --- */
 upgradeClick.onclick = () => {
     if (gameData.coins >= 50) {
-        gameData.coins -= 50;
-        gameData.clickPower += 1;
-        playSound("upgrade");
-        saveGame();
-        updateUI();
+        gameData.coins -= 50; gameData.clickPower += 1;
+        playSound("upgrade"); saveGame(); updateUI();
     } else { playSound("error"); }
 };
-
 upgradeClickBig.onclick = () => {
     if (gameData.coins >= 200) {
-        gameData.coins -= 200;
-        gameData.clickPower += 5;
-        playSound("upgrade");
-        saveGame();
-        updateUI();
+        gameData.coins -= 200; gameData.clickPower += 5;
+        playSound("upgrade"); saveGame(); updateUI();
     } else { playSound("error"); }
 };
-
 upgradeClickMega.onclick = () => {
     if (gameData.coins >= 950) {
-        gameData.coins -= 950;
-        gameData.clickPower += 25;
-        playSound("upgrade");
-        saveGame();
-        updateUI();
+        gameData.coins -= 950; gameData.clickPower += 25;
+        playSound("upgrade"); saveGame(); updateUI();
     } else { playSound("error"); }
 };
-
 upgradeClickGod.onclick = () => {
     if (gameData.coins >= 4500) {
-        gameData.coins -= 4500;
-        gameData.clickPower += 100;
-        playSound("upgrade");
-        saveGame();
-        updateUI();
+        gameData.coins -= 4500; gameData.clickPower += 100;
+        playSound("upgrade"); saveGame(); updateUI();
     } else { playSound("error"); }
 };
 
 autoClick.onclick = () => {
     if (!gameData.autoClicker && gameData.coins >= 300) {
-        gameData.coins -= 300;
-        gameData.autoClicker = true;
-        gameData.autoClickSpeed = 1000;
-        playSound("success");
-        saveGame();
-        updateUI();
+        gameData.coins -= 300; gameData.autoClicker = true; gameData.autoClickSpeed = 1000;
+        playSound("success"); saveGame(); updateUI();
     } else { playSound("error"); }
 };
-
 autoClickFast.onclick = () => {
     if (gameData.coins >= 1200) {
-        gameData.coins -= 1200;
-        gameData.autoClicker = true;
-        gameData.autoClickSpeed = 350;
-        playSound("success");
-        saveGame();
-        updateUI();
+        gameData.coins -= 1200; gameData.autoClicker = true; gameData.autoClickSpeed = 350;
+        playSound("success"); saveGame(); updateUI();
     } else { playSound("error"); }
 };
-
 autoClickHyper.onclick = () => {
     if (gameData.coins >= 5500) {
-        gameData.coins -= 5500;
-        gameData.autoClicker = true;
-        gameData.autoClickSpeed = 80;
-        playSound("success");
-        saveGame();
-        updateUI();
+        gameData.coins -= 5500; gameData.autoClicker = true; gameData.autoClickSpeed = 80;
+        playSound("success"); saveGame(); updateUI();
     } else { playSound("error"); }
 };
 
 buyDuckArmy.onclick = () => {
     if (gameData.coins >= 22000) {
-        gameData.coins -= 22000;
-        gameData.duckArmyCount += 1;
-        playSound("success");
-        saveGame();
-        updateUI();
+        gameData.coins -= 22000; gameData.duckArmyCount += 1;
+        playSound("success"); saveGame(); updateUI();
     } else { playSound("error"); }
 };
 
 buySkinBlue.onclick = () => {
     if (gameData.coins >= 500) {
-        gameData.coins -= 500;
-        gameData.skin = "blue";
-        playSound("success");
-        saveGame();
-        updateUI();
+        gameData.coins -= 500; gameData.skin = "blue";
+        playSound("success"); saveGame(); updateUI();
     } else { playSound("error"); }
 };
-
 buySkinRed.onclick = () => {
     if (gameData.coins >= 1200) {
-        gameData.coins -= 1200;
-        gameData.skin = "red";
-        playSound("success");
-        saveGame();
-        updateUI();
+        gameData.coins -= 1200; gameData.skin = "red";
+        playSound("success"); saveGame(); updateUI();
     } else { playSound("error"); }
 };
-
 buySkinGold.onclick = () => {
     if (gameData.coins >= 3000) {
-        gameData.coins -= 3000;
-        gameData.skin = "gold";
-        playSound("success");
-        saveGame();
-        updateUI();
+        gameData.coins -= 3000; gameData.skin = "gold";
+        playSound("success"); saveGame(); updateUI();
     } else { playSound("error"); }
 };
-
 buySkinRainbow.onclick = () => {
     if (gameData.coins >= 10000) {
-        gameData.coins -= 10000;
-        gameData.skin = "rainbow";
-        playSound("success");
-        saveGame();
-        updateUI();
+        gameData.coins -= 10000; gameData.skin = "rainbow";
+        playSound("success"); saveGame(); updateUI();
     } else { playSound("error"); }
 };
 
 evolveDuckBtn.onclick = () => {
     if (!gameData.evolved && gameData.coins >= 4500) {
-        gameData.coins -= 4500;
-        gameData.evolved = true;
-        playSound("success");
-        saveGame();
-        updateUI();
+        gameData.coins -= 4500; gameData.evolved = true;
+        playSound("success"); saveGame(); updateUI();
     } else { playSound("error"); }
 };
 
 prestigeBtn.onclick = () => {
     if (gameData.coins >= 7500) {
-        gameData.coins = 0;
-        gameData.clickPower = 1;
-        gameData.autoClicker = false;
-        gameData.autoClickSpeed = 1000;
-        gameData.duckArmyCount = 0;
-        gameData.prestige += 1;
-        playSound("success");
-        saveGame();
-        updateUI();
+        gameData.coins = 0; gameData.clickPower = 1; gameData.autoClicker = false;
+        gameData.autoClickSpeed = 1000; gameData.duckArmyCount = 0; gameData.prestige += 1;
+        playSound("success"); saveGame(); updateUI();
     } else { playSound("error"); }
 };
 
@@ -420,15 +600,15 @@ setInterval(() => {
     }
 }, 100);
 
-/* --- STATS & ACHIEVEMENTS SYSTEM --- */
+/* --- STATS & ACHIEVEMENTS --- */
 function renderStats() {
     statsContentList.innerHTML = `
+        <div class="stat-row-card"><span>Display Name:</span> <strong>${gameData.username}</strong></div>
         <div class="stat-row-card"><span>Total Coins Earned:</span> <strong>${Math.floor(gameData.totalCoinsEarned)}</strong></div>
         <div class="stat-row-card"><span>Total Manual Clicks:</span> <strong>${gameData.totalClicks}</strong></div>
         <div class="stat-row-card"><span>Current Click Power:</span> <strong>${gameData.clickPower * (1 + gameData.prestige)}</strong></div>
         <div class="stat-row-card"><span>Duck Army Outposts:</span> <strong>${gameData.duckArmyCount}</strong></div>
         <div class="stat-row-card"><span>Cosmic Prestige Level:</span> <strong>${gameData.prestige}</strong></div>
-        <div class="stat-row-card"><span>Active Duck Skin:</span> <strong style="text-transform:capitalize;">${gameData.skin}</strong></div>
     `;
 }
 
@@ -461,31 +641,26 @@ function renderAchievements() {
     });
 }
 
-/* --- SETTINGS & LEADERBOARD --- */
+/* --- SETTINGS HANDLERS --- */
 toggleSoundBtn.onclick = () => {
     gameData.soundEnabled = !gameData.soundEnabled;
-    playSound("click");
-    saveGame();
+    playSound("click"); saveGame();
     toggleSoundBtn.textContent = gameData.soundEnabled ? "🔊 Sound: Enabled" : "🔇 Sound: Disabled";
 };
 
 toggleParticlesBtn.onclick = () => {
     gameData.particlesEnabled = !gameData.particlesEnabled;
-    playSound("click");
-    saveGame();
+    playSound("click"); saveGame();
     toggleParticlesBtn.textContent = gameData.particlesEnabled ? "✨ Particles: Enabled" : "💤 Particles: Disabled";
 };
 
 dailyRewardBtn.onclick = () => {
     const now = Date.now();
-    const oneDay = 24 * 60 * 60 * 1000;
-    if (now - gameData.lastDailyReward >= oneDay) {
+    if (now - gameData.lastDailyReward >= 86400000) {
         gameData.coins += 2500;
         gameData.totalCoinsEarned += 2500;
         gameData.lastDailyReward = now;
-        playSound("success");
-        saveGame();
-        updateUI();
+        playSound("success"); saveGame(); updateUI();
         alert("🎁 Daily tribute claimed: +2500 coins!");
     } else {
         playSound("error");
@@ -494,66 +669,14 @@ dailyRewardBtn.onclick = () => {
 };
 
 resetProgressBtn.onclick = () => {
-    playSound("error");
     if (confirm("Hard factory reset all progress?")) {
-        gameData = {
-            coins: 0,
-            totalCoinsEarned: 0,
-            totalClicks: 0,
-            clickPower: 1,
-            autoClicker: false,
-            autoClickSpeed: 1000,
-            duckArmyCount: 0,
-            prestige: 0,
-            soundEnabled: gameData.soundEnabled,
-            particlesEnabled: gameData.particlesEnabled,
-            skin: "yellow",
-            evolved: false,
-            lastDailyReward: 0,
-            unlockedAchievements: []
-        };
-        saveGame();
-        updateUI();
+        gameData.coins = 0; gameData.totalCoinsEarned = 0; gameData.totalClicks = 0;
+        gameData.clickPower = 1; gameData.autoClicker = false; gameData.duckArmyCount = 0;
+        gameData.prestige = 0; gameData.skin = "yellow"; gameData.evolved = false;
+        saveGame(); updateUI();
     }
 };
 
-function loadLeaderboard() {
-    let data = localStorage.getItem("duckLeaderboardUniverse");
-    if (!data) {
-        leaderboardList.innerHTML = "<div style='opacity:0.6; text-align:center;'>No saved scores yet. Click save score below!</div>";
-        return;
-    }
-    let scores = JSON.parse(data);
-    leaderboardList.innerHTML = "";
-    scores.forEach((s, i) => {
-        const div = document.createElement("div");
-        div.className = "achievement-card";
-        div.innerHTML = `<span>#${i + 1} — Coins: ${Math.floor(s.coins)}</span><span>Prestige: ${s.prestige}</span>`;
-        leaderboardList.appendChild(div);
-    });
-}
-
-function saveLeaderboardEntry() {
-    playSound("success");
-    let data = localStorage.getItem("duckLeaderboardUniverse");
-    let scores = data ? JSON.parse(data) : [];
-    scores.push({ coins: gameData.coins, prestige: gameData.prestige });
-    scores.sort((a, b) => b.coins - a.coins);
-    scores = scores.slice(0, 10);
-    localStorage.setItem("duckLeaderboardUniverse", JSON.stringify(scores));
-    loadLeaderboard();
-    alert("💾 Score saved to hall of fame!");
-}
-
-saveScoreBtn.onclick = () => saveLeaderboardEntry();
-
-moneyDisplay.onclick = () => {
-    playSound("click");
-    leaderboardPanel.classList.remove("hidden");
-    loadLeaderboard();
-};
-
-closeLeaderboard.onclick = () => { playSound("click"); leaderboardPanel.classList.add("hidden"); };
-
+// INITIALIZATION
+checkUsernameState();
 updateUI();
-loadLeaderboard();

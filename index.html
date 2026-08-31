@@ -5,8 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Duck Clicker Universe Deluxe</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 </head>
 <body>
+
+    <!-- USERNAME PROMPT MODAL -->
+    <div id="usernameModal" class="panel hidden">
+        <div class="panel-header">
+            <span>👤 Enter Display Name</span>
+        </div>
+        <div class="panel-body">
+            <p>Welcome to Duck Clicker Universe! Choose a display name to join the global leaderboard & chat:</p>
+            <input id="usernameInput" type="text" placeholder="Enter Username..." maxlength="18">
+            <button id="saveUsernameBtn" class="action-btn full-width">Save & Play</button>
+        </div>
+    </div>
 
     <!-- AMBIENT FLOATING FEATHER BACKGROUND EFFECT -->
     <div id="ambientFeatherContainer"></div>
@@ -17,10 +33,15 @@
         <div class="stat-badge" id="cpsDisplay">⚡ CPS: 0</div>
         <div class="stat-badge" id="clickPowerDisplay">💪 Power: +1</div>
         <div class="stat-badge" id="prestigeDisplay">✨ Prestige: 0</div>
+        <div class="stat-badge user-badge" id="userBadgeDisplay">👤 <span id="currentUsernameText">Player</span> <span id="ownerTagHeader" class="owner-tag hidden">OWNER</span></div>
         <button class="nav-btn" id="shopBtn">🛒 Shop & Lab</button>
         <button class="nav-btn" id="statsBtn">📊 Stats</button>
         <button class="nav-btn" id="achievementsBtn">🏆 Quests</button>
-        <button class="nav-btn" id="adminBtn">🔒 Admin Portal</button>
+        <button class="nav-btn" id="leaderboardBtn">🏆 Leaderboard</button>
+        <button class="nav-btn" id="transferBtn">💸 Transfer</button>
+        <button class="nav-btn" id="chatBtn">💬 Global Chat</button>
+        <!-- HIDDEN BY DEFAULT: ONLY VISIBLE WITH OWNER TAG -->
+        <button class="nav-btn hidden" id="adminBtn">🔒 Admin Portal</button>
         <button class="nav-btn" id="settingsBtn">⚙️ Settings</button>
     </div>
 
@@ -90,18 +111,64 @@
         <div class="panel-body custom-scroll" id="achievementListContainer"></div>
     </div>
 
+    <!-- LEADERBOARD PANEL -->
+    <div id="leaderboardPanel" class="panel hidden">
+        <div class="panel-header">
+            <span>🏆 Global Leaderboard</span>
+            <button class="closeBtn" id="closeLeaderboard">✕</button>
+        </div>
+        <div class="panel-body custom-scroll">
+            <div class="tab-container">
+                <button id="tabMoney" class="tab-btn active">🪙 Most Coins</button>
+                <button id="tabXP" class="tab-btn">✨ Most Prestige</button>
+            </div>
+            <div id="leaderboardList"></div>
+        </div>
+    </div>
+
+    <!-- TRANSFER PANEL -->
+    <div id="transferPanel" class="panel hidden">
+        <div class="panel-header">
+            <span>💸 Player Resource Transfer</span>
+            <button class="closeBtn" id="closeTransfer">✕</button>
+        </div>
+        <div class="panel-body custom-scroll">
+            <h3>Select Recipient</h3>
+            <div id="transferUserList" class="user-select-list"></div>
+            <div id="transferForm" class="hidden">
+                <h3 id="selectedRecipientName">Transferring To: -</h3>
+                <input id="transferAmount" type="number" placeholder="Enter Amount" min="1">
+                <div class="admin-grid">
+                    <button id="sendCoinsBtn" class="action-btn">Send Coins</button>
+                    <button id="sendPrestigeBtn" class="action-btn">Send Prestige</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL CHAT PANEL -->
+    <div id="chatPanel" class="panel hidden">
+        <div class="panel-header">
+            <span>💬 Live Universe Chat</span>
+            <button class="closeBtn" id="closeChat">✕</button>
+        </div>
+        <div class="panel-body custom-scroll">
+            <div id="chatBox" class="chat-message-box custom-scroll"></div>
+            <div class="chat-input-row">
+                <input id="chatMessageInput" type="text" placeholder="Type a message..." maxlength="120">
+                <button id="sendMessageBtn" class="action-btn">Send</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ADMIN PANEL -->
     <div id="adminPanel" class="panel hidden draggable">
         <div class="panel-header" id="adminHeader">
             <span>🔒 Secure Overlord Portal</span>
             <button class="closeBtn" id="closeAdmin">✕</button>
         </div>
-        <div class="panel-body">
-            <div id="adminAuthSection">
-                <input id="adminCode" type="password" placeholder="Enter Security Passcode">
-                <button id="submitCode" class="action-btn full-width">Unlock Command Center</button>
-            </div>
-            <div id="adminTools" class="hidden">
+        <div class="panel-body custom-scroll">
+            <div id="adminTools">
                 <h3>⚡ Universe Control Hub</h3>
                 <input id="adminAmount" type="number" placeholder="Enter Value">
                 <div class="admin-grid">
@@ -112,6 +179,9 @@
                     <button id="resetGame" class="danger-btn">Reset Stats</button>
                     <button id="openSuperAdmin" class="super-btn">Super Console</button>
                 </div>
+
+                <h3>👤 Live Account Management</h3>
+                <div id="adminUserList" class="user-select-list"></div>
             </div>
         </div>
     </div>
@@ -137,22 +207,11 @@
             <button class="closeBtn" id="closeSettings">✕</button>
         </div>
         <div class="panel-body">
+            <button id="changeUsernameBtn" class="action-btn full-width">👤 Change Display Name</button>
             <button id="toggleSound" class="action-btn full-width">🔊 Toggle Sound Effects</button>
             <button id="toggleParticles" class="action-btn full-width">✨ Toggle Particle Physics</button>
             <button id="dailyReward" class="action-btn full-width">🎁 Claim Daily Tribute (+2500 🪙)</button>
             <button id="resetProgress" class="danger-btn full-width">🗑️ Hard Factory Reset</button>
-        </div>
-    </div>
-
-    <!-- LEADERBOARD -->
-    <div id="leaderboardPanel" class="panel hidden">
-        <div class="panel-header">
-            <span>🏆 Hall of Fame Leaderboard</span>
-            <button class="closeBtn" id="closeLeaderboard">✕</button>
-        </div>
-        <div class="panel-body custom-scroll">
-            <div id="leaderboardList"></div>
-            <button id="saveScore" class="action-btn full-width">💾 Save Current Score</button>
         </div>
     </div>
 

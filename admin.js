@@ -1,11 +1,9 @@
-const adminBtn = document.getElementById("adminBtn");
+const adminPortalBtn = document.getElementById("adminBtn");
 const adminPanel = document.getElementById("adminPanel");
 const closeAdmin = document.getElementById("closeAdmin");
-const submitCode = document.getElementById("submitCode");
-const adminAuthSection = document.getElementById("adminAuthSection");
 const adminTools = document.getElementById("adminTools");
-const adminCode = document.getElementById("adminCode");
 const adminAmount = document.getElementById("adminAmount");
+const adminUserList = document.getElementById("adminUserList");
 
 const giveCoins = document.getElementById("giveCoins");
 const removeCoins = document.getElementById("removeCoins");
@@ -20,39 +18,60 @@ const resetSelfBtn = document.getElementById("resetSelf");
 const resetAllBtn = document.getElementById("resetAll");
 const maxEverything = document.getElementById("maxEverything");
 
-adminBtn.onclick = () => {
-    playSound("click");
-    adminPanel.classList.remove("hidden");
-};
+if (adminPortalBtn) {
+    adminPortalBtn.onclick = () => {
+        playSound("click");
+        adminPanel.classList.remove("hidden");
+        renderAdminUserList();
+    };
+}
+
 closeAdmin.onclick = () => {
     playSound("click");
     adminPanel.classList.add("hidden");
 };
 
-// Secure obfuscated validation (hidden from plain view, works locally and online)
-function verifyAdminCode(input) {
-    // Encoded token representing "2285"
-    const encodedToken = "MjI4NQ==";
-    try {
-        return atob(encodedToken) === input.trim();
-    } catch (e) {
-        return false;
-    }
-}
+window.renderAdminUserList = function() {
+    if (!adminUserList) return;
+    adminUserList.innerHTML = "";
+    const users = window.allGlobalUsers || {};
+    Object.keys(users).forEach(id => {
+        const u = users[id];
+        const div = document.createElement("div");
+        div.className = "achievement-card";
+        div.style.flexDirection = "column";
+        div.style.alignItems = "flex-start";
+        div.style.gap = "6px";
+        
+        div.innerHTML = `
+            <div><strong>${u.username || 'Player'}</strong> ${u.isOwner ? '<span class="owner-tag">OWNER</span>' : ''}</div>
+            <small>Coins: ${u.coins || 0} | Prestige: ${u.prestige || 0}</small>
+            <div style="display:flex; gap:4px; width:100%; margin-top:4px;">
+                <button onclick="adminGiveUserCoins('${id}')" style="padding:4px 8px; font-size:11px;">+Coins</button>
+                <button onclick="adminRenameUser('${id}')" style="padding:4px 8px; font-size:11px;">Rename</button>
+                <button onclick="adminToggleOwner('${id}', ${!u.isOwner})" style="padding:4px 8px; font-size:11px;">${u.isOwner ? 'Remove Owner' : 'Give Owner'}</button>
+            </div>
+        `;
+        adminUserList.appendChild(div);
+    });
+};
 
-submitCode.onclick = () => {
-    playSound("click");
-    if (verifyAdminCode(adminCode.value)) {
-        playSound("success");
-        adminAuthSection.classList.add("hidden");
-        adminTools.classList.remove("hidden");
-        superAdminPanel.classList.remove("hidden");
-        adminCode.value = "";
-    } else {
-        playSound("error");
-        adminCode.style.borderColor = "#ff1744";
-        setTimeout(() => adminCode.style.borderColor = "", 1000);
+window.adminGiveUserCoins = function(targetId) {
+    const amt = parseInt(prompt("Coins to give/take (negative to remove):", "1000"), 10);
+    if (!isNaN(amt)) {
+        firebase.database().ref("users/" + targetId + "/coins").transaction(c => Math.max(0, (c || 0) + amt));
     }
+};
+
+window.adminRenameUser = function(targetId) {
+    const newName = prompt("New display name:");
+    if (newName && newName.trim().length >= 2) {
+        firebase.database().ref("users/" + targetId + "/username").set(newName.trim());
+    }
+};
+
+window.adminToggleOwner = function(targetId, newStatus) {
+    firebase.database().ref("users/" + targetId + "/isOwner").set(newStatus);
 };
 
 function getAdminAmount() {
@@ -61,111 +80,69 @@ function getAdminAmount() {
 }
 
 giveCoins.onclick = () => {
-    playSound("upgrade");
     const amt = getAdminAmount();
     if (amt > 0) {
-        gameData.coins += amt;
-        gameData.totalCoinsEarned += amt;
-        saveGame();
-        updateUI();
+        gameData.coins += amt; gameData.totalCoinsEarned += amt;
+        saveGame(); updateUI(); playSound("upgrade");
     }
 };
 
 removeCoins.onclick = () => {
-    playSound("click");
     const amt = getAdminAmount();
     if (amt > 0) {
         gameData.coins = Math.max(0, gameData.coins - amt);
-        saveGame();
-        updateUI();
+        saveGame(); updateUI(); playSound("click");
     }
 };
 
 setClickPower.onclick = () => {
-    playSound("upgrade");
     const amt = getAdminAmount();
     if (amt > 0) {
         gameData.clickPower = amt;
-        saveGame();
-        updateUI();
+        saveGame(); updateUI(); playSound("upgrade");
     }
 };
 
 setPrestige.onclick = () => {
-    playSound("upgrade");
     const amt = getAdminAmount();
     if (amt >= 0) {
         gameData.prestige = amt;
-        saveGame();
-        updateUI();
+        saveGame(); updateUI(); playSound("upgrade");
     }
 };
 
 resetGame.onclick = () => {
-    playSound("error");
     if (confirm("Reset current game stats?")) {
-        gameData.coins = 0;
-        gameData.clickPower = 1;
-        gameData.autoClicker = false;
-        gameData.duckArmyCount = 0;
-        gameData.prestige = 0;
-        gameData.skin = "yellow";
-        gameData.evolved = false;
-        saveGame();
-        updateUI();
+        gameData.coins = 0; gameData.clickPower = 1; gameData.autoClicker = false;
+        gameData.duckArmyCount = 0; gameData.prestige = 0; gameData.skin = "yellow";
+        gameData.evolved = false; saveGame(); updateUI();
     }
 };
 
-openSuperAdmin.onclick = () => {
-    playSound("click");
-    superAdminPanel.classList.remove("hidden");
-};
-
-closeSuperAdmin.onclick = () => {
-    playSound("click");
-    superAdminPanel.classList.add("hidden");
-};
+openSuperAdmin.onclick = () => { superAdminPanel.classList.remove("hidden"); };
+closeSuperAdmin.onclick = () => { superAdminPanel.classList.add("hidden"); };
 
 resetSelfBtn.onclick = () => {
-    playSound("error");
-    gameData.coins = 0;
-    gameData.clickPower = 1;
-    gameData.autoClicker = false;
-    gameData.duckArmyCount = 0;
-    gameData.prestige = 0;
-    gameData.skin = "yellow";
-    gameData.evolved = false;
-    saveGame();
-    updateUI();
+    gameData.coins = 0; gameData.clickPower = 1; gameData.autoClicker = false;
+    gameData.duckArmyCount = 0; gameData.prestige = 0; gameData.skin = "yellow";
+    gameData.evolved = false; saveGame(); updateUI();
 };
 
 resetAllBtn.onclick = () => {
-    playSound("error");
     if (confirm("Wipe ALL local universe data & leaderboards?")) {
         localStorage.removeItem("duckSaveUniverse");
-        localStorage.removeItem("duckLeaderboardUniverse");
         location.reload();
     }
 };
 
 maxEverything.onclick = () => {
-    playSound("success");
-    gameData.coins += 10000000;
-    gameData.clickPower += 1000;
-    gameData.prestige += 25;
-    gameData.duckArmyCount += 500;
-    gameData.evolved = true;
-    gameData.skin = "rainbow";
-    saveGame();
-    updateUI();
+    gameData.coins += 10000000; gameData.clickPower += 1000; gameData.prestige += 25;
+    gameData.duckArmyCount += 500; gameData.evolved = true; gameData.skin = "rainbow";
+    saveGame(); updateUI(); playSound("success");
 };
 
-/* Draggable panels implementation */
 function makeDraggable(panel, header) {
-    let isDragging = false;
-    let offsetX = 0;
-    let offsetY = 0;
-
+    let isDragging = false, offsetX = 0, offsetY = 0;
     header.addEventListener("mousedown", (e) => {
         isDragging = true;
         const rect = panel.getBoundingClientRect();
@@ -173,16 +150,12 @@ function makeDraggable(panel, header) {
         offsetY = e.clientY - rect.top;
         panel.style.transform = "none";
     });
-
     document.addEventListener("mousemove", (e) => {
         if (!isDragging) return;
         panel.style.left = e.clientX - offsetX + "px";
         panel.style.top = e.clientY - offsetY + "px";
     });
-
-    document.addEventListener("mouseup", () => {
-        isDragging = false;
-    });
+    document.addEventListener("mouseup", () => isDragging = false);
 }
 
 makeDraggable(adminPanel, document.getElementById("adminHeader"));
